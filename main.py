@@ -13,7 +13,6 @@ MOVIES_FILE = "kinolar.json"
 USERS_FILE = "foydalanuvchilar.json"
 
 VIDEO, KINO_NOMI, KINO_KODI, KINO_KATEGORIYA, KINO_TAVSIF = range(5)
-DELETE_KOD, DELETE_KATEGORIYA, DELETE_QISM = range(5, 8)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,8 +46,8 @@ class KinoBot:
     def load_users(self):
         if os.path.exists(USERS_FILE):
             try:
-                with open(USERS_FILE, 'r', encoding='utf-8') as f:                    return json.load(f)
-            except:
+                with open(USERS_FILE, 'r', encoding='utf-8') as f:
+                    return json.load(f)            except:
                 pass
         return {"idlar": [], "soni": 0}
 
@@ -96,8 +95,8 @@ class KinoBot:
                 item = self.kinolar["items"].get(msg_id)
                 if item:
                     result.append(item)
-        else:            for cat_name, cat in self.kinolar["kategoriyalar"].items():
-                msg_ids = cat.get(public_kod, [])
+        else:
+            for cat_name, cat in self.kinolar["kategoriyalar"].items():                msg_ids = cat.get(public_kod, [])
                 for msg_id in msg_ids:
                     item = self.kinolar["items"].get(msg_id)
                     if item:
@@ -145,9 +144,8 @@ def main_menu_markup():
 
 def home_button_markup():
     return InlineKeyboardMarkup([[InlineKeyboardButton("🏠 ASOSIY MENYU", callback_data='home_menu')]])
-# FOYDALANUVCHI UCHUN
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):    user = update.effective_user
     bot.add_user(user.id)
     await update.message.reply_text(f"👋 Assalomu alaykum, <b>{user.full_name}</b>!\n\nKategoriyani tanlang:", reply_markup=main_menu_markup(), parse_mode="HTML")
 
@@ -194,9 +192,9 @@ async def play_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not item:
         await query.edit_message_text("❌ Kino topilmadi.")
         return
-    caption = f"🎬 <b>{item['nomi']}</b>\n\n📝 {item['tavsif']}"    if item['file_type'] == 'video':
-        await context.bot.send_video(query.message.chat_id, item['video_id'], caption=caption, parse_mode="HTML", reply_markup=home_button_markup())
-    else:
+    caption = f"🎬 <b>{item['nomi']}</b>\n\n📝 {item['tavsif']}"
+    if item['file_type'] == 'video':
+        await context.bot.send_video(query.message.chat_id, item['video_id'], caption=caption, parse_mode="HTML", reply_markup=home_button_markup())    else:
         await context.bot.send_document(query.message.chat_id, item['video_id'], caption=caption, parse_mode="HTML", reply_markup=home_button_markup())
 
 async def home_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -205,7 +203,6 @@ async def home_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     await query.edit_message_text("🏠 Asosiy menyu:", reply_markup=main_menu_markup())
 
-# ADMIN
 async def admin_addmovie(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return ConversationHandler.END
@@ -243,9 +240,9 @@ async def movie_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🎬 KINO", callback_data='cat_kino')],
         [InlineKeyboardButton("📺 SERIAL", callback_data='cat_serial')],
         [InlineKeyboardButton("🐰 MULTFILM", callback_data='cat_multfilm')],
-    ]    await update.message.reply_text("📂 Kategoriya:", reply_markup=InlineKeyboardMarkup(buttons))
+    ]
+    await update.message.reply_text("📂 Kategoriya:", reply_markup=InlineKeyboardMarkup(buttons))
     return KINO_KATEGORIYA
-
 async def movie_category_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -292,10 +289,10 @@ async def cmd_delete(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"Xato: {e}")
 
-async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):    total_items = len(bot.kinolar['items'])
+async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    total_items = len(bot.kinolar['items'])
     total_users = bot.users.get('soni', 0)
-    txt = f"📊 Kinolar: {total_items}\n👥 Foydalanuvchilar: {total_users}"
-    await update.message.reply_text(txt)
+    txt = f"📊 Kinolar: {total_items}\n👥 Foydalanuvchilar: {total_users}"    await update.message.reply_text(txt)
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
